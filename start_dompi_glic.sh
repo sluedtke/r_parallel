@@ -1,16 +1,20 @@
-#!/bin/bash
-# show commands being executed, per debug
-set -x
-
+#---------------------------------------
 # Set job parameters
-######################################################################
-## check what MPI implementation is loaded before setting the parameter
-## module list ??
 #BSUB -a openmpi
 
-# Set number of CPUs
+# Set number of cpus
 #BSUB -n 4
 
+# Distribute the cpus equally over the host
+#BSUB -R "span[ptile=2]"
 
+# output file - overwrite if exists
+#BSUB -oo _output.txt
+
+# error file - overwrite if exists
+#BSUB -eo _error.txt
+
+
+#---------------------------------------
 # Start R MPI job
-mpirun.lsf ./dompi_example.R
+mpirun.lsf Rscript dompi.R
