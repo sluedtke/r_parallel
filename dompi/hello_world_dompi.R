@@ -40,7 +40,7 @@ result = foreach(i = c(1:10), .inorder = FALSE) %dopar% {
     output = paste("Hello, I am worker", rank,
                    "on host", host,
                    "from", total_cpu, "cpu's in total",
-                   "processing task ID", i, ".")
+                   "processing task ID", i)
 }
 # ----------------------------------------------------------------------------
 
