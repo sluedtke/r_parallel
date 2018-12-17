@@ -28,7 +28,7 @@ registerDoMPI(cl)
 # ----------------------------------------------------------------------------
 
 
-result = foreach(i = c(1:10), .inorder = FALSE, .combine = "c") %dopar% {
+result = foreach(i = c(1:10), .inorder = FALSE) %dopar% {
     # The Rmpi package gets loaded with the doMPI package so we have access to
     # some functions to get the properties of the workers.
     # startMPIcluster uses 0 as the default communicator. A communicator
@@ -39,7 +39,8 @@ result = foreach(i = c(1:10), .inorder = FALSE, .combine = "c") %dopar% {
     total_cpu = mpi.comm.size(comm = 0)
     output = paste("Hello, I am worker", rank,
                    "on host", host,
-                   "from", total_cpu, "cpu's in total")
+                   "from", total_cpu, "cpu's in total",
+                   "processing task ID", i, ".")
 }
 # ----------------------------------------------------------------------------
 
