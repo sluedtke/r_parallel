@@ -77,3 +77,4 @@ if (mpi.comm.rank(0)==0) {
        .Call("mpi_finalize",PACKAGE = "Rmpi")
     }
 }
+print("*** successfully loaded Rmpi .RProfile ***")

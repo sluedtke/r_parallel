@@ -27,8 +27,12 @@ cl = startMPIcluster()
 registerDoMPI(cl)
 # ----------------------------------------------------------------------------
 
-
-result = foreach(i = c(5:15), .inorder = FALSE,
+# x = seq(from = 5, to = 75, by = 5)
+# tasks = sample(x, length(x))
+task = rev(c(rep(1, 10),10, 5, 5))
+id = seq(1:length(task))
+df = data.frame(task, id)
+result = foreach(i = df$id, .inorder = T,
                  .combine = "rbind") %dopar% {
     # The Rmpi package gets loaded with the doMPI package so we have access to
     # some functions to get the properties of the workers.
@@ -39,13 +43,13 @@ result = foreach(i = c(5:15), .inorder = FALSE,
     host = mpi.get.processor.name()
     total_cpu = mpi.comm.size(comm = 0)
     start_time = Sys.time()
-    Sys.sleep(i)
+    Sys.sleep(df$task[i])
     end_time = Sys.time()
     output = data.frame(mpi_rank = rank,
                    mpi_host = host,
                    mpi_total_cpu = total_cpu,
-                   mpi_task_id = i,
-                   mpi_processing_time = i,
+                   mpi_task_id = df$id[i],
+                   mpi_processing_time = df$task[i],
                    mpi_start_time = start_time,
                    mpi_end_time = end_time
     )
@@ -58,24 +62,27 @@ closeCluster(cl)
 
 
 print(result)
-# ----------------------------------------------------------------------------
-library(tidyverse)
 
-result %>% dplyr::select(mpi_rank, mpi_task_id, mpi_host, contains("start_time"), contains("end_time")) %>%
-           tidyr::gather(key, mpi_time, -mpi_rank, -mpi_host, -mpi_task_id ) %>%
-           dplyr::mutate(mpi_task_id = as.factor(mpi_task_id)) %>%
-           dplyr::mutate(mpi_rank = as.factor(mpi_rank)) %>%
-ggplot(aes(y = mpi_rank, x = mpi_time)) +
-  # geom_point(size = 3, aes( color = time_slot, group = group)) +
-  geom_path(size = 3, aes(color = mpi_task_id, group = mpi_rank)) +
-  geom_text(size = 3, aes(label = mpi_task_id)) +
-  # xkcdaxis(xrange, yrange) +
-  ylab("CPU # ") +
-  # xlab("elapsed time in some unit") +
-  # theme_xkcd() +
-  theme(legend.position = "right",
-        legend.title=element_blank(),
-        text = element_text(size=25),
-        axis.ticks.length=unit(0.5,"cm")
-        )
+ saveRDS(result, "../plots/dompi_inorder_T.rds")
+# saveRDS(result, "../plots/dompi_inorder_F.rds")
+# ----------------------------------------------------------------------------
+# library(tidyverse)
+# 
+# result %>% dplyr::select(mpi_rank, mpi_task_id, mpi_host, contains("start_time"), contains("end_time")) %>%
+#            tidyr::gather(key, mpi_time, -mpi_rank, -mpi_host, -mpi_task_id ) %>%
+#            dplyr::mutate(mpi_task_id = as.factor(mpi_task_id)) %>%
+#            dplyr::mutate(mpi_rank = as.factor(mpi_rank)) %>%
+# ggplot(aes(y = mpi_rank, x = mpi_time)) +
+#   # geom_point(size = 3, aes( color = time_slot, group = group)) +
+#   geom_path(size = 3, aes(color = mpi_task_id, group = mpi_rank)) +
+#   geom_text(size = 3, aes(label = mpi_task_id)) +
+#   # xkcdaxis(xrange, yrange) +
+#   ylab("CPU # ") +
+#   # xlab("elapsed time in some unit") +
+#   # theme_xkcd() +
+#   theme(legend.position = "right",
+#         legend.title=element_blank(),
+#         text = element_text(size=25),
+#         axis.ticks.length=unit(0.5,"cm")
+#         )
 # ----------------------------------------------------------------------------
